@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087443"><link rel="manifest" href="manifest.webmanifest">
+<title>RuralLink 🇿🇦</title>
+<style>
+body{margin:0;background:#f3f7f4;color:#17221b;font-family:system-ui,sans-serif}.wrap{max-width:560px;margin:auto;padding:16px}
+.hero{margin-top:24px;background:linear-gradient(135deg,#087443,#0b9254);color:#fff;border-radius:24px;padding:24px}
+h1{font-size:32px;margin:0 0 8px}.btn{width:100%;border:0;border-radius:14px;padding:14px;font-weight:800}.white{background:#fff;color:#087443}.green{background:#087443;color:#fff}
+.card{background:#fff;border:1px solid #dfe8e2;border-radius:18px;padding:16px;margin:12px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{text-align:left;min-height:105px}.tile small{display:block;color:#68756e;margin-top:6px}.app{display:none;padding-bottom:72px}
+.top{background:#087443;color:#fff;padding:14px 16px;position:sticky;top:0}.brand{font-size:25px;font-weight:900}.brand span{color:#b8dc3b}
+.screen{display:none;padding:16px}.screen.active{display:block}.muted{color:#68756e;font-size:13px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex}.nav button{flex:1;border:0;background:#fff;padding:8px 2px;font-size:10px;font-weight:800}.nav button.active{color:#087443}.nav b{display:block;font-size:18px}
+.asset{border:1px solid #dfe7e2;background:#fff;border-radius:13px;padding:12px}.asset.selected{border:2px solid #087443}.input{width:100%;padding:13px;border:1px solid #d5e0d9;border-radius:12px;margin:6px 0 12px;box-sizing:border-box}
+</style>
+</head>
+<body>
+<div id="landing" class="wrap"><section class="hero"><h1>RuralLink 🇿🇦</h1>
+<p><b>Opportunities for your community.</b></p><p>💼 Find opportunities<br>💡 Discover hustles<br>🛠️ Find local services<br>📴 Offline-friendly</p>
+<button class="btn white" id="start">🚀 Start using RuralLink</button></section>
+<div class="card"><b>No account required.</b><p class="muted">Start as a guest. Your saved information stays on this phone.</p></div></div>
+
+<div id="app" class="app"><header class="top"><div class="brand">Rural<span>Link</span></div><div id="status"></div></header>
+<section id="home" class="screen active"><div class="card"><h2>Welcome 👋</h2><p>Find local opportunities and practical ways to earn.</p><button class="btn green" onclick="go('opportunities')">Explore opportunities →</button></div>
+<div class="grid"><button class="card tile" onclick="go('opportunities')">💼 <b>Opportunities</b><small>Jobs, training, business & events</small></button>
+<button class="card tile" onclick="go('ideas')">💡 <b>Hustle Ideas</b><small>Ideas based on what you have</small></button>
+<button class="card tile" onclick="go('resources')">🧰 <b>What I Have</b><small>Build a plan offline</small></button>
+<button class="card tile" onclick="go('community')">🛒 <b>Community</b><small>Local needs and services</small></button></div></section>
+
+<section id="opportunities" class="screen"><h2>Opportunities</h2><input id="search" class="input" placeholder="Search..."><div id="opps"></div></section>
+<section id="resources" class="screen"><h2>What do you have?</h2><p class="muted">Choose resources. This works offline.</p><div class="grid" id="assets"></div><button class="btn green" onclick="plan()">Build my hustle plan →</button></section>
+<section id="ideas" class="screen"><h2>Hustle Ideas</h2><div class="card"><b>Your resources</b><p id="selectedText" class="muted">Choose resources first.</p></div><div id="ideasList"></div></section>
+<section id="community" class="screen"><h2>Community</h2><button class="btn green" onclick="post()">+ Create local post</button><div id="posts"></div></section>
+
+<nav class="nav"><button data-p="home" onclick="go('home')" class="active"><b>⌂</b>Home</button>
+<button data-p="opportunities" onclick="go('opportunities')"><b>⌕</b>Opportunities</button><button data-p="ideas" onclick="go('ideas')"><b>💡</b>Ideas</button>
+<button data-p="resources" onclick="go('resources')"><b>▣</b>Resources</button><button data-p="community" onclick="go('community')"><b>♟</b>Community</button></nav></div>
+
+<script>
+const R=[["📱","Smartphone"],["🚗","Transport"],["🌱","Land"],["🐐","Livestock"],["🛠️","Tools"],["📶","Internet"],["🧠","Skills"],["🍲","Cooking"],["💵","Capital"],["🏠","Space"],["💧","Water"]];
+let selected=new Set();
+function cache(){try{return JSON.parse(localStorage.rurallink||"{}")}catch{return{}}}
+function save(x){localStorage.rurallink=JSON.stringify(x)}
+function go(p){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.getElementById(p).classList.add("active");document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.p==p));if(p=="opportunities")renderOpps();if(p=="community")renderPosts()}
+function enter(){landing.style.display="none";app.style.display="block";renderAssets();renderPosts();renderOpps();status()}
+function status(){document.getElementById("status").textContent=navigator.onLine?"🟢 Online":"🟡 Offline"}
+function renderOpps(){let a=cache().opportunities||[];let q=(search.value||"").toLowerCase();a=a.filter(x=>(x.title+" "+(x.area||"")+" "+(x.description||"")).toLowerCase().includes(q));opps.innerHTML=a.map(x=>'<div class="card"><b>'+x.title+'</b><p class="muted">'+(x.area||"")+'</p><p>'+(x.description||"")+'</p></div>').join("")||'<div class="card">No saved opportunities yet.</div>'}
+search.oninput=renderOpps;
+function renderAssets(){assets.innerHTML=R.map((x,i)=>'<button class="asset '+(selected.has(i)?"selected":"")+'" onclick="toggle('+i+')">'+x[0]+'<br><b>'+x[1]+'</b></button>').join("")}
+function toggle(i){selected.has(i)?selected.delete(i):selected.add(i);renderAssets()}
+function plan(){let n=[...selected].map(i=>R[i][1]);if(!n.length)return alert("Select at least one resource.");selectedText.textContent=n.join(" • ");let a=[];
+if(n.includes("Livestock"))a.push("🐔 Sell chickens, eggs or goats locally.");if(n.includes("Skills"))a.push("🧠 Offer your skill locally.");
+if(n.includes("Smartphone"))a.push("📱 Offer CV, poster or social-media services.");if(n.includes("Transport"))a.push("🚗 Offer local delivery and errands.");
+if(n.includes("Land")||n.includes("Water"))a.push("🥬 Grow and sell vegetables.");if(n.includes("Cooking"))a.push("🍲 Sell plates, snacks or baked goods.");
+if(!a.length)a.push("💡 Start a small local service using what you have.");ideasList.innerHTML=a.map(x=>'<div class="card">'+x+'</div>').join("");go("ideas")}
+function post(){let title=prompt("Post title");if(!title)return;let description=prompt("What do you want people to know?");if(!description)return;let x=cache();x.posts=x.posts||[];x.posts.unshift({title,description,area:"Local"});save(x);renderPosts()}
+function renderPosts(){let p=cache().posts||[];posts.innerHTML=p.map(x=>'<div class="card"><b>'+x.title+'</b><p class="muted">'+x.area+'</p><p>'+x.description+'</p></div>').join("")||'<div class="card">No local posts yet.</div>'}
+start.onclick=enter;addEventListener("online",status);addEventListener("offline",status);
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script></body></html>
